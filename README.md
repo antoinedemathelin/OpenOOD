@@ -1,74 +1,43 @@
 # OpenOOD: Benchmarking Generalized OOD Detection
-
-
-| :exclamation:  We are looking forward to further extending the scope and building OpenOOD v2.0. Specifically, we are interested in 1) incorporating more modalities (e.g., text/language), 2) OOD in vision-language models, multi-modal foundation models, and large language models. If you want to join us or have any other ideas/thoughts, please don't heisitate to contact [jingkang001@e.ntu.edu.sg](mailto:jingkang001@e.ntu.edu.sg)! |
-|-----------------------------------------|
-
-
-[![paper](https://img.shields.io/badge/Paper-OpenReview%20(v1.0)-b31b1b?style=for-the-badge)](https://openreview.net/pdf?id=gT6j4_tskUt)
+[![paper](https://img.shields.io/badge/Paper-In%20Process-b31b1b?style=for-the-badge)]()
 &nbsp;&nbsp;&nbsp;
-[![paper](https://img.shields.io/badge/PAPER-arXiv%20(v1.5)-yellowgreen?style=for-the-badge)](https://arxiv.org/abs/2306.09301)
+[![paper](https://img.shields.io/badge/Integrate-30+%20Methods-228c22?style=for-the-badge)]()
 &nbsp;&nbsp;&nbsp;
-
-
-
-[![paper](https://img.shields.io/badge/leaderboard-35%2B%20Methods-228c22?style=for-the-badge)](https://zjysteven.github.io/OpenOOD/)
-&nbsp;&nbsp;&nbsp;
-[![paper](https://img.shields.io/badge/colab-tutorial-orange?style=for-the-badge)](https://colab.research.google.com/drive/1tvTpCM1_ju82Yygu40fy7Lc0L1YrlkQF?usp=sharing)
-&nbsp;&nbsp;&nbsp;
-[![paper](https://img.shields.io/badge/Forum-SLACK-797ef6?style=for-the-badge)](https://openood.slack.com/)
+[![paper](https://img.shields.io/badge/Support-Dist%20Training-797ef6?style=for-the-badge)]()
 
 
 <img src="https://live.staticflickr.com/65535/52145428300_78fd595193_k.jpg" width="800">
 
 
 This repository reproduces representative methods within the [`Generalized Out-of-Distribution Detection Framework`](https://arxiv.org/abs/2110.11334),
-aiming to make a fair comparison across methods that were initially developed for anomaly detection, novelty detection, open set recognition, and out-of-distribution detection.
+aiming to make a fair comparison across methods that initially developed for anomaly detection, novelty detection, open set recognition, and out-of-distribution detection.
 This codebase is still under construction.
 Comments, issues, contributions, and collaborations are all welcomed!
 
 | ![timeline.jpg](https://live.staticflickr.com/65535/52144751937_95282e7de3_k.jpg) |
 |:--:|
-| <b>Timeline of the methods that OpenOOD supports. More methods are included as OpenOOD iterates.</b>|
+| <b>Timeline of the methods that OpenOOD supports.</b>|
 
 
 ## Updates
-- **25 Sept, 2023**: OpenOOD now supports OOD detection with foundation models including zero-shot CLIP and DINOv2 linear probe. Check out the example evaluation script [here](https://github.com/Jingkang50/OpenOOD/blob/main/scripts/eval_ood_imagenet_foundation_models.py).
-- **16 June, 2023**: :boom::boom: We are releasing OpenOOD `v1.5`, which includes the following exciting updates. A detailed changelog is provided in the [Wiki](https://github.com/Jingkang50/OpenOOD/wiki/OpenOOD-v1.5-change-log). An overview of the supported methods and benchmarks (with paper links) is available [here](https://github.com/Jingkang50/OpenOOD/wiki/OpenOOD-v1.5-methods-&-benchmarks-overview).
-    - A new [report](https://arxiv.org/abs/2306.09301) which provides benchmarking results on ImageNet and for full-spectrum detection.
-    - A unified, easy-to-use evaluator that allows evaluation by simply creating an evaluator instance and calling its functions. Check out this [colab tutorial](https://colab.research.google.com/drive/1tvTpCM1_ju82Yygu40fy7Lc0L1YrlkQF?usp=sharing)!
-    -  A live [leaderboard](https://zjysteven.github.io/OpenOOD/) that tracks the state-of-the-art of this field.
-- **14 October, 2022**: OpenOOD `v1.0` is accepted to NeurIPS 2022. Check the report [here](https://arxiv.org/abs/2210.07242).
 - **14 June, 2022**: We release `v0.5`.
 - **12 April, 2022**: Primary release to support [Full-Spectrum OOD Detection](https://arxiv.org/abs/2204.05306).
 
-## FAQ
-- `APS_mode` means Automatic (hyper)Parameter Searching mode, which enables the model to validate all the hyperparameters in the sweep list based on the validation ID/OOD set. The default value is False. Check [here](https://github.com/Jingkang50/OpenOOD/blob/main/configs/postprocessors/dice.yml) for example.
-
-
 ## Get Started
 
-### v1.5 (up-to-date)
-#### Installation
-OpenOOD now supports installation via pip.
+
+To setup the environment, we use `conda` to manage our dependencies.
+
+Our developers use `CUDA 10.1` to do experiments.
+
+You can specify the appropriate `cudatoolkit` version to install on your machine in the `environment.yml` file, and then run the following to create the `conda` environment:
+```bash
+conda env create -f environment.yml
+conda activate openood
 ```
-pip install git+https://github.com/Jingkang50/OpenOOD
-# optional, if you want to use CLIP
-# pip install git+https://github.com/openai/CLIP.git
-```
 
-#### Data
-If you only use our evaluator, the benchmarks for evaluation will be automatically downloaded by the evaluator (again check out this [tutorial](https://colab.research.google.com/drive/1tvTpCM1_ju82Yygu40fy7Lc0L1YrlkQF?usp=sharing)). If you would like to also use OpenOOD for training, you can get all data with our [downloading script](https://github.com/Jingkang50/OpenOOD/tree/main/scripts/download). Note that ImageNet-1K training images should be downloaded from its official website.
-
-#### Pre-trained checkpoints
-OpenOOD v1.5 focuses on 4 ID datasets, and we release pre-trained models accordingly.
-- CIFAR-10 [[Google Drive]](https://drive.google.com/file/d/1byGeYxM_PlLjT72wZsMQvP6popJeWBgt/view?usp=drive_link): ResNet-18 classifiers trained with cross-entropy loss from 3 training runs.
-- CIFAR-100 [[Google Drive]](https://drive.google.com/file/d/1s-1oNrRtmA0pGefxXJOUVRYpaoAML0C-/view?usp=drive_link): ResNet-18 classifiers trained with cross-entropy loss from 3 training runs.
-- ImageNet-200 [[Google Drive]](https://drive.google.com/file/d/1ddVmwc8zmzSjdLUO84EuV4Gz1c7vhIAs/view?usp=drive_link): ResNet-18 classifiers trained with cross-entropy loss from 3 training runs.
-- ImageNet-1K [[Google Drive]](https://drive.google.com/file/d/15PdDMNRfnJ7f2oxW6lI-Ge4QJJH3Z0Fy/view?usp=drive_link): ResNet-50 classifiers including 1) the one from torchvision, 2) the ones that are trained by us with specific methods such as MOS, CIDER, and 3) the official checkpoints of data augmentation methods such as AugMix, PixMix.
-
-Again, these checkpoints can be downloaded with the downloading script [here](https://github.com/Jingkang50/OpenOOD/tree/main/scripts/download).
-
+Datasets and pretrained models are provided [here](https://entuedu-my.sharepoint.com/:f:/g/personal/jingkang001_e_ntu_edu_sg/Eso7IDKUKQ9AoY7hm9IU2gIBMWNnWGCYPwClpH0TASRLmg?e=kMrkVQ).
+Please unzip the files if necessary.
 
 Our codebase accesses the datasets from `./data/` and pretrained models from `./results/checkpoints/` by default.
 ```
@@ -76,6 +45,7 @@ Our codebase accesses the datasets from `./data/` and pretrained models from `./
 ├── data
 │   ├── benchmark_imglist
 │   ├── images_classic
+│   ├── images_medical
 │   └── images_largescale
 ├── openood
 ├── results
@@ -86,8 +56,22 @@ Our codebase accesses the datasets from `./data/` and pretrained models from `./
 ├── ...
 ```
 
-#### Training and evaluation scripts
-We provide training and evaluation scripts for all the methods we support in [scripts folder](https://github.com/Jingkang50/OpenOOD/tree/main/scripts).
+| OOD Benchmark |    MNIST    |    CIFAR-10    |   CIFAR-100  | ImageNet-1K |
+| ------------- | ----------- | -------------- | ------------ | ----------- |
+| Accuracy      |    98.50    |      95.24     |     77.10    |    76.17    |
+| Checkpoint    |   [link]()  |    [link]()    |   [link]()   |   [link]()  |
+
+| OSR Benchmark |   MNIST-6   |     CIFAR-6    |   CIFAR-50   |    TIN-20   |
+| ------------- | ----------- | -------------- | ------------ | ----------- |
+| Accuracy (avg 5 seeds) |        |              |     |     |
+| Checkpoint    |    [links]()    |    [links]()    |   [links]()  | [links]() |
+
+
+The easiest hands-on script is to train LeNet-5 on MNIST and evaluate its OOD or FS-OOD performance with MSP baseline.
+```bash
+sh scripts/basics/mnist/train_mnist.sh
+sh scripts/ood/msp/mnist_test_ood_msp.sh
+```
 
 ---
 ## Supported Benchmarks (10)
@@ -111,31 +95,31 @@ This part lists all the benchmarks we support. Feel free to include more.
 </details>
 
 <details open>
-<summary><b>Out-of-Distribution Detection (6)</b></summary>
+<summary><b>Out-of-Distribution Detection (5)</b></summary>
 
 > - [x] [BIMCV (A COVID X-Ray Dataset)]()
 >      > Near-OOD: `CT-SCAN`, `X-Ray-Bone`;<br>
 >      > Far-OOD: `MNIST`, `CIFAR-10`, `Texture`, `Tiny-ImageNet`;<br>
+>      > Robust-ID: `ActMed`;
 > - [x] [MNIST]()
 >      > Near-OOD: `NotMNIST`, `FashionMNIST`;<br>
 >      > Far-OOD: `Texture`, `CIFAR-10`, `TinyImageNet`, `Places365`;<br>
+>      > Robust-ID: `SVHN`;
 > - [x] [CIFAR-10]()
 >      > Near-OOD: `CIFAR-100`, `TinyImageNet`;<br>
 >      > Far-OOD: `MNIST`, `SVHN`, `Texture`, `Places365`;<br>
+>      > Robust-ID: `CINIC-10`;
 > - [x] [CIFAR-100]()
 >      > Near-OOD: `CIFAR-10`, `TinyImageNet`;<br>
 >      > Far-OOD: `MNIST`, `SVHN`, `Texture`, `Places365`;<br>
-> - [x] [ImageNet-200]()
->      > Near-OOD: `SSB-hard`, `NINCO`;<br>
->      > Far-OOD: `iNaturalist`, `Texture`, `OpenImage-O`;<br>
->      > Covariate-Shifted ID: `ImageNet-C`, `ImageNet-R`, `ImageNet-v2`;
+>      > Robust-ID: `CIFAR-100-C`;
 > - [x] [ImageNet-1K]()
->      > Near-OOD: `SSB-hard`, `NINCO`;<br>
->      > Far-OOD: `iNaturalist`, `Texture`, `OpenImage-O`;<br>
->      > Covariate-Shifted ID: `ImageNet-C`, `ImageNet-R`, `ImageNet-v2`;
+>      > Near-OOD: `Species`, `iNaturalist`, `ImageNet-O`, `OpenImage-O`;<br>
+>      > Far-OOD:  `Texture`, `MNIST`;<br>
+>      > Robust-ID: `ImageNet-v2`;
 </details>
 
-Note that OpenOOD v1.5 emphasizes and focuses on the last 4 benchmarks for OOD detection.
+
 
 ---
 ## Supported Backbones (6)
@@ -159,8 +143,8 @@ This part lists all the backbones we will support in our codebase, including CNN
 </details>
 
 ---
-## Supported Methods (50+)
-This part lists all the methods we include in this codebase. Up to `v1.5`, we totally support **more than 50 popular methods** for generalized OOD detection.
+## Supported Methods (36)
+This part lists all the methods we include in this codebase. In `v0.5`, we totally support **more than 32 popular methods** for generalized OOD detection.
 
 All the supported methodolgies can be placed in the following four categories.
 
@@ -193,11 +177,13 @@ distance: f4d5b3 -->
 <summary><b>Open Set Recognition (3)</b></summary>
 
 > Post-Hoc Methods (1):
-> - [x] [![](https://img.shields.io/badge/CVPR'16-OpenMax-d0e9ff?style=for-the-badge)](https://github.com/13952522076/Open-Set-Recognition) ![postprocess]
-> - [x] [![](https://img.shields.io/badge/ICCV'21-OpenGAN-fdd7e6?style=for-the-badge)](https://github.com/aimerykong/OpenGAN/tree/main/utils) ![postprocess]
+> - [x] [![](https://img.shields.io/badge/CVPR'16-OpenMax-d0e9ff?style=for-the-badge)](https://github.com/13952522076/Open-Set-Recognition) ![training] ![postprocess]
 
 > Training Methods (1):
 > - [x] [![](https://img.shields.io/badge/TPAMI'21-ARPL-f4d5b3?style=for-the-badge)](https://github.com/iCGY96/ARPL) ![training] ![postprocess]
+
+> Training With Extra Data (1):
+> - [x] [![](https://img.shields.io/badge/ICCV'21-OpenGAN-fdd7e6?style=for-the-badge)](https://github.com/aimerykong/OpenGAN/tree/main/utils) ![training] ![postprocess]
 </details>
 
 
@@ -211,13 +197,12 @@ classification: fdd7e6,
 distance: f4d5b3 -->
 
 > Post-Hoc Methods (13):
-> - [x] [![msp](https://img.shields.io/badge/ICLR'17-MSP-fdd7e6?style=for-the-badge)](https://openreview.net/forum?id=Hkg4TI9xl)
-> - [x] [![odin](https://img.shields.io/badge/ICLR'18-ODIN-fdd7e6?style=for-the-badge)](https://openreview.net/forum?id=H1VGkIxRZ) &nbsp;&nbsp; ![postprocess]
-> - [x] [![mds](https://img.shields.io/badge/NeurIPS'18-MDS-f4d5b3?style=for-the-badge)](https://papers.nips.cc/paper/2018/hash/abdeb6f575ac5c6676b747bca8d09cc2-Abstract.html) &nbsp;&nbsp; ![postprocess]
-> - [x] [![mdsensemble](https://img.shields.io/badge/NeurIPS'18-MDSEns-f4d5b3?style=for-the-badge)](https://papers.nips.cc/paper/2018/hash/abdeb6f575ac5c6676b747bca8d09cc2-Abstract.html) &nbsp;&nbsp; ![postprocess]
+> - [x] [![msp](https://img.shields.io/badge/ICLR'17-MSP-fdd7e6?style=for-the-badge)]()
+> - [x] [![odin](https://img.shields.io/badge/ICLR'18-ODIN-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![postprocess]
+> - [x] [![mds](https://img.shields.io/badge/NeurIPS'18-MDS-f4d5b3?style=for-the-badge)]() &nbsp;&nbsp; ![postprocess]
 > - [x] [![gram](https://img.shields.io/badge/ICML'20-Gram-f4d5b3?style=for-the-badge)](https://github.com/VectorInstitute/gram-ood-detection)  &nbsp;&nbsp; ![postprocess]
 > - [x] [![ebo](https://img.shields.io/badge/NeurIPS'20-EBO-d0e9ff?style=for-the-badge)](https://github.com/wetliu/energy_ood) &nbsp;&nbsp; ![postprocess]
-> - [x] [![rmds](https://img.shields.io/badge/ARXIV'21-RMDS-f4d5b3?style=for-the-badge)](https://arxiv.org/abs/2106.09022) &nbsp;&nbsp; ![postprocess]
+> - [x] [![dice](https://img.shields.io/badge/arXiv'21-DICE-d0e9ff?style=for-the-badge)](https://github.com/deeplearning-wisc/dice) &nbsp;&nbsp; ![postprocess]
 > - [x] [![gradnorm](https://img.shields.io/badge/NeurIPS'21-GradNorm-fdd7e6?style=for-the-badge)](https://github.com/deeplearning-wisc/gradnorm_ood) &nbsp;&nbsp; ![postprocess]
 > - [x] [![react](https://img.shields.io/badge/NeurIPS'21-ReAct-fdd7e6?style=for-the-badge)](https://github.com/deeplearning-wisc/react) &nbsp;&nbsp; ![postprocess]
 > - [x] [![mls](https://img.shields.io/badge/ICML'22-MLS-fdd7e6?style=for-the-badge)](https://github.com/hendrycks/anomaly-seg) &nbsp;&nbsp; ![postprocess]
@@ -225,41 +210,30 @@ distance: f4d5b3 -->
 > - [x] [![sem](https://img.shields.io/badge/arXiv'22-SEM-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![postprocess]
 > - [x] [![vim](https://img.shields.io/badge/CVPR'22-VIM-fdd7e6?style=for-the-badge)](https://ooddetection.github.io/) &nbsp;&nbsp; ![postprocess]
 > - [x] [![knn](https://img.shields.io/badge/ICML'22-KNN-fdd7e6?style=for-the-badge)](https://github.com/deeplearning-wisc/knn-ood) &nbsp;&nbsp; ![postprocess]
-> - [x] [![dice](https://img.shields.io/badge/ECCV'22-DICE-d0e9ff?style=for-the-badge)](https://github.com/deeplearning-wisc/dice) &nbsp;&nbsp; ![postprocess]
-> - [x] [![rankfeat](https://img.shields.io/badge/NEURIPS'22-RANKFEAT-fdd7e6?style=for-the-badge)](https://github.com/KingJamesSong/RankFeat) &nbsp;&nbsp; ![postprocess]
-> - [x] [![ash](https://img.shields.io/badge/ICLR'23-ASH-fdd7e6?style=for-the-badge)](https://andrijazz.github.io/ash) &nbsp;&nbsp; ![postprocess]
-> - [x] [![she](https://img.shields.io/badge/ICLR'23-SHE-fdd7e6?style=for-the-badge)](https://github.com/zjs975584714/SHE) &nbsp;&nbsp; ![postprocess]
-> - [x] [![gen](https://img.shields.io/badge/CVPR'23-GEN-fdd7e6?style=for-the-badge)](https://openaccess.thecvf.com/content/CVPR2023/papers/Liu_GEN_Pushing_the_Limits_of_Softmax-Based_Out-of-Distribution_Detection_CVPR_2023_paper.pdf) &nbsp;&nbsp; ![postprocess]
 
 > Training Methods (6):
 > - [x] [![confbranch](https://img.shields.io/badge/arXiv'18-ConfBranch-fdd7e6?style=for-the-badge)](https://github.com/uoguelph-mlrg/confidence_estimation) &nbsp;&nbsp; ![preprocess] &nbsp; ![training]
-> - [x] [![rotpred](https://img.shields.io/badge/neurips'19-RotPred-fdd7e6?style=for-the-badge)](https://github.com/hendrycks/ss-ood) &nbsp;&nbsp; ![preprocess] &nbsp; ![training]
 > - [x] [![godin](https://img.shields.io/badge/CVPR'20-G&#8211;ODIN-fdd7e6?style=for-the-badge)](https://github.com/guyera/Generalized-ODIN-Implementation)  &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
 > - [x] [![csi](https://img.shields.io/badge/NeurIPS'20-CSI-fdd7e6?style=for-the-badge)](https://github.com/alinlab/CSI)  &nbsp;&nbsp; ![preprocess] &nbsp; ![training] &nbsp; ![postprocess]
 > - [x] [![ssd](https://img.shields.io/badge/ICLR'21-SSD-fdd7e6?style=for-the-badge)](https://github.com/inspire-group/SSD)  &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
 > - [x] [![mos](https://img.shields.io/badge/CVPR'21-MOS-fdd7e6?style=for-the-badge)](https://github.com/deeplearning-wisc/large_scale_ood)  &nbsp;&nbsp; ![training]
 > - [x] [![vos](https://img.shields.io/badge/ICLR'22-VOS-d0e9ff?style=for-the-badge)](https://github.com/deeplearning-wisc/vos) &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
 > - [x] [![logitnorm](https://img.shields.io/badge/ICML'22-LogitNorm-fdd7e6?style=for-the-badge)](https://github.com/hongxin001/logitnorm_ood) &nbsp;&nbsp; ![training] &nbsp; ![preprocess]
-> - [x] [![cider](https://img.shields.io/badge/ICLR'23-CIDER-f4d5b3?style=for-the-badge)](https://github.com/deeplearning-wisc/cider) &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
-> - [x] [![npos](https://img.shields.io/badge/ICLR'23-NPOS-f4d5b3?style=for-the-badge)](https://github.com/deeplearning-wisc/npos) &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
-> - [x] [![t2fnorm](https://img.shields.io/badge/arXiv'23-T2FNorm-f4d5b3?style=for-the-badge)](https://arxiv.org/abs/2305.17797) &nbsp;&nbsp; ![training]
 
 
 > Training With Extra Data (3):
-> - [x] [![oe](https://img.shields.io/badge/ICLR'19-OE-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![extradata] &nbsp; ![training]
+> - [x] [![oe](https://img.shields.io/badge/ICLR'19-OE-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![extradata]
 > - [x] [![mcd](https://img.shields.io/badge/ICCV'19-MCD-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![extradata] &nbsp; ![training]
 > - [x] [![udg](https://img.shields.io/badge/ICCV'21-UDG-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![extradata] &nbsp; ![training]
-> - [x] [![mixoe](https://img.shields.io/badge/WACV'23-MixOE-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![extradata] &nbsp; ![training]
 </details>
 
 
 <details open>
-<summary><b>Method Uncertainty (4)</b></summary>
+<summary><b>Method Uncertainty (3)</b></summary>
 
 > - [x] [![mcdropout](https://img.shields.io/badge/ICML'16-MC&#8211;Dropout-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
 > - [x] [![deepensemble](https://img.shields.io/badge/NeurIPS'17-Deep&#8211;Ensemble-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![training]
 > - [x] [![tempscale](https://img.shields.io/badge/ICML'17-Temp&#8211;Scaling-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![postprocess]
-> - [x] [![rts](https://img.shields.io/badge/AAAI'23-RTS-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![training] &nbsp; ![postprocess]
 </details>
 
 
@@ -268,18 +242,13 @@ distance: f4d5b3 -->
 
 > - [x] [![mixup](https://img.shields.io/badge/ICLR'18-Mixup-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![preprocess]
 > - [x] [![cutmix](https://img.shields.io/badge/ICCV'19-CutMix-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![preprocess]
-> - [x] [![styleaugment](https://img.shields.io/badge/ICLR'19-StyleAugment-fdd7e6?style=for-the-badge)](https://openreview.net/forum?id=Bygh9j09KX) &nbsp;&nbsp; ![preprocess]
-> - [x] [![randaugment](https://img.shields.io/badge/CVPRW'20-RandAugment-fdd7e6?style=for-the-badge)](https://openaccess.thecvf.com/content_CVPRW_2020/html/w40/Cubuk_Randaugment_Practical_Automated_Data_Augmentation_With_a_Reduced_Search_Space_CVPRW_2020_paper.html) &nbsp;&nbsp; ![preprocess]
-> - [x] [![augmix](https://img.shields.io/badge/ICLR'20-AugMix-fdd7e6?style=for-the-badge)](https://github.com/google-research/augmix) &nbsp;&nbsp; ![preprocess]
-> - [x] [![deepaugment](https://img.shields.io/badge/ICCV'21-DeepAugment-fdd7e6?style=for-the-badge)](https://github.com/hendrycks/imagenet-r) &nbsp;&nbsp; ![preprocess]
-> - [x] [![pixmix](https://img.shields.io/badge/CVPR'21-PixMix-fdd7e6?style=for-the-badge)](https://openaccess.thecvf.com/content/CVPR2022/html/Hendrycks_PixMix_Dreamlike_Pictures_Comprehensively_Improve_Safety_Measures_CVPR_2022_paper.html) &nbsp;&nbsp; ![preprocess]
-> - [x] [![regmixup](https://img.shields.io/badge/ICLR'23-RegMixup-fdd7e6?style=for-the-badge)](https://github.com/FrancescoPinto/RegMixup) &nbsp;&nbsp; ![preprocess]
+> - [x] [![pixmix](https://img.shields.io/badge/CVPR'21-PixMix-fdd7e6?style=for-the-badge)]() &nbsp;&nbsp; ![preprocess]
 </details>
 
 ---
 ## Contributing
 We appreciate all contributions to improve OpenOOD.
-We sincerely welcome community users to participate in these projects. Please refer to [CONTRIBUTING.md](https://github.com/Jingkang50/OpenOOD/blob/main/CONTRIBUTING.md) for the contributing guideline.
+We sincerely welcome community users to participate in these projects. Please refer to [CONTRIBUTING.md](https://github.com/Jingkang50/OpenOOD/blob/v0.5/CONTRIBUTING.md) for the contributing guideline.
 
 ## Contributors
 <a href="https://github.com/jingkang50/openood/graphs/contributors">
@@ -290,15 +259,6 @@ We sincerely welcome community users to participate in these projects. Please re
 ## Citation
 If you find our repository useful for your research, please consider citing our paper:
 ```bibtex
-# v1.5 report
-@article{zhang2023openood,
-  title={OpenOOD v1.5: Enhanced Benchmark for Out-of-Distribution Detection},
-  author={Zhang, Jingyang and Yang, Jingkang and Wang, Pengyun and Wang, Haoqi and Lin, Yueqian and Zhang, Haoran and Sun, Yiyou and Du, Xuefeng and Zhou, Kaiyang and Zhang, Wayne and Li, Yixuan and Liu, Ziwei and Chen, Yiran and Li, Hai},
-  journal={arXiv preprint arXiv:2306.09301},
-  year={2023}
-}
-
-# v1.0 report
 @article{yang2022openood,
     author = {Yang, Jingkang and Wang, Pengyun and Zou, Dejian and Zhou, Zitang and Ding, Kunyuan and Peng, Wenxuan and Wang, Haoqi and Chen, Guangyao and Li, Bo and Sun, Yiyou and Du, Xuefeng and Zhou, Kaiyang and Zhang, Wayne and Hendrycks, Dan and Li, Yixuan and Liu, Ziwei},
     title = {OpenOOD: Benchmarking Generalized Out-of-Distribution Detection},
@@ -318,6 +278,7 @@ If you find our repository useful for your research, please consider citing our 
     journal={arXiv preprint arXiv:2110.11334},
     year={2021}
 }
+
 ```
 
 

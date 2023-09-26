@@ -1,3 +1,2 @@
 postprocessor:
   name: temperature_scaling
-  APS_mode: False

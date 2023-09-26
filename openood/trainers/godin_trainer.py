@@ -4,7 +4,6 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import openood.utils.comm as comm
 from openood.utils import Config
 
 from .lr_scheduler import cosine_annealing
@@ -17,10 +16,7 @@ class GodinTrainer:
         parameters = []
         h_parameters = []
         for name, parameter in net.named_parameters():
-            if name in [
-                    'h.h.weight', 'h.h.bias', 'module.h.h.weight',
-                    'module.h.h.bias'
-            ]:
+            if name == 'h.h.weight' or name == 'h.h.bias':
                 h_parameters.append(parameter)
             else:
                 parameters.append(parameter)
@@ -76,8 +72,7 @@ class GodinTrainer:
                                      len(train_dataiter) + 1),
                                desc='Epoch {:03d}: '.format(epoch_idx),
                                position=0,
-                               leave=True,
-                               disable=not comm.is_main_process()):
+                               leave=True):
             batch = next(train_dataiter)
             data = batch['data'].cuda()
             target = batch['label'].cuda()

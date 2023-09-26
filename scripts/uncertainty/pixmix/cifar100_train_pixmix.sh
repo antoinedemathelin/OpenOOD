@@ -13,11 +13,10 @@ PYTHONPATH='.':$PYTHONPATH \
 # -w SG-IDC1-10-51-2-${node} \
 
 python main.py \
-    --config configs/datasets/cifar100/cifar100.yml \
-    configs/networks/resnet18_32x32.yml \
-    configs/pipelines/train/baseline.yml \
-    configs/preprocessors/pixmix_preprocessor.yml \
-    --num_workers 8 \
-    --optimizer.num_epochs 100 \
-    --mark pixmix \
-    --seed 0
+--config configs/datasets/cifar100/cifar100.yml \
+configs/networks/resnet18_32x32.yml \
+configs/pipelines/train/baseline.yml \
+configs/preprocessors/pixmix_preprocessor.yml \
+--num_workers 8 \
+--optimizer.num_epochs 100 \
+--mark pixmix

@@ -65,12 +65,8 @@ class ImglistDataset(BaseDataset):
         sample = dict()
         sample['image_name'] = image_name
         kwargs = {'name': self.name, 'path': path, 'tokens': tokens}
-        try:
-            # some preprocessor methods require setup
-            self.preprocessor.setup(**kwargs)
-        except:
-            pass
-
+        # some preprocessor methods require setup
+        self.preprocessor.setup(**kwargs)
         try:
             if not self.dummy_read:
                 with open(path, 'rb') as f:

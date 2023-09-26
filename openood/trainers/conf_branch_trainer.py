@@ -2,11 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
+from torch.optim.lr_scheduler import MultiStepLR
 from tqdm import tqdm
 
-import openood.utils.comm as comm
 from openood.utils import Config
-from .lr_scheduler import cosine_annealing
 
 
 class ConfBranchTrainer:
@@ -21,15 +20,9 @@ class ConfBranchTrainer:
             momentum=config.optimizer['momentum'],
             nesterov=config.optimizer['nesterov'],
             weight_decay=config.optimizer['weight_decay'])
-        self.scheduler = torch.optim.lr_scheduler.LambdaLR(
-            self.optimizer,
-            lr_lambda=lambda step: cosine_annealing(
-                step,
-                config.optimizer.num_epochs * len(train_loader),
-                1,
-                1e-6 / config.optimizer.lr,
-            ),
-        )
+        self.scheduler = MultiStepLR(self.optimizer,
+                                     milestones=config.scheduler['milestones'],
+                                     gamma=config.scheduler['gamma'])
         self.lmbda = self.config.trainer['lmbda']
 
     def train_epoch(self, epoch_idx):
@@ -43,8 +36,7 @@ class ConfBranchTrainer:
                                      len(train_dataiter) + 1),
                                desc='Epoch {:03d}'.format(epoch_idx),
                                position=0,
-                               leave=True,
-                               disable=not comm.is_main_process()):
+                               leave=True):
             batch = next(train_dataiter)
             images = Variable(batch['data']).cuda()
             labels = Variable(batch['label']).cuda()
@@ -89,13 +81,12 @@ class ConfBranchTrainer:
 
             total_loss.backward()
             self.optimizer.step()
-            self.scheduler.step()
 
             pred_idx = torch.max(pred_original.data, 1)[1]
             total += labels.size(0)
             correct_count += (pred_idx == labels.data).sum()
             accuracy = correct_count / total
-
+        self.scheduler.step()
         metrics = {}
         metrics['train_acc'] = accuracy
         metrics['loss'] = total_loss
@@ -112,3 +103,12 @@ def encode_onehot(labels, n_classes):
     onehot.zero_()
     onehot.scatter_(1, labels.view(-1, 1), 1)
     return onehot
+
+
+"""
+[0,0,0,1,0,0,0,0,0,0]
+[0,0,0,0,0,0,0,1,0,0]
+[0,0,0,0,0,1,0,0,0,0]
+...
+
+"""

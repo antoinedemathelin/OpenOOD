@@ -1,11 +1,10 @@
-exp_name: "'@{dataset.name}'_'@{network.name}'_'@{trainer.name}'_e'@{optimizer.num_epochs}'_lr'@{optimizer.lr}'/s'@{seed}'"
+exp_name: "'@{dataset.name}'_'@{network.name}'_'@{trainer.name}'_e'@{optimizer.num_epochs}'_lr'@{optimizer.lr}'"
 output_dir: ./results/
 save_output: True
 merge_option: default
-seed: 0
 
 num_gpus: 1
-num_workers: 8
+num_workers: 0
 num_machines: 1
 machine_rank: 0
 
@@ -30,4 +29,4 @@ optimizer:
 
 recorder:
   name: base
-  save_all_models: False
+  save_all_models: True

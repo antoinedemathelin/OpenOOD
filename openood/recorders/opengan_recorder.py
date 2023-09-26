@@ -11,29 +11,31 @@ class OpenGanRecorder(BaseRecorder):
     def __init__(self, config) -> None:
         super().__init__(config)
         self.save_dir = self.config.output_dir
-        self.best_val_auroc = 0
+        self.G_losses = []
+        self.D_losses = []
+        self.D_lowest_loss = -1
         self.best_epoch_idx = 0
 
-    def report(self, train_metrics, val_metrics):
+    def report(self, train_metrics):
         print('Epoch [{:03d}/{:03d}] | Time {:5d}s | Loss_G: {:.4f} | '
-              'Loss_D: {:.4f} | Val AUROC: {:.2f}\n'.format(
-                  train_metrics['epoch_idx'], self.config.optimizer.num_epochs,
-                  int(time.time() - self.begin_time),
-                  train_metrics['G_losses'][-1], train_metrics['D_losses'][-1],
-                  val_metrics['auroc']),
+              'Loss_D: {:.4f}\n'.format(train_metrics['epoch_idx'],
+                                        self.config.optimizer.num_epochs,
+                                        int(time.time() - self.begin_time),
+                                        train_metrics['G_losses'][-1],
+                                        train_metrics['D_losses'][-1]),
               flush=True)
 
-    def save_model(self, net, val_metrics):
+    def save_model(self, net, train_metrics):
+
         netG = net['netG']
         netD = net['netD']
-        epoch_idx = val_metrics['epoch_idx']
+        epoch_idx = train_metrics['epoch_idx']
 
-        try:
-            netG_wts = copy.deepcopy(netG.module.state_dict())
-            netD_wts = copy.deepcopy(netD.module.state_dict())
-        except AttributeError:
-            netG_wts = copy.deepcopy(netG.state_dict())
-            netD_wts = copy.deepcopy(netD.state_dict())
+        self.G_losses.extend(train_metrics['G_losses'])
+        self.D_losses.extend(train_metrics['D_losses'])
+
+        netG_wts = copy.deepcopy(netG.state_dict())
+        netD_wts = copy.deepcopy(netD.state_dict())
 
         if self.config.recorder.save_all_models:
             save_pth = os.path.join(self.save_dir,
@@ -43,9 +45,15 @@ class OpenGanRecorder(BaseRecorder):
                                     'epoch-{}_DNet.ckpt'.format(epoch_idx))
             torch.save(netD_wts, save_pth)
 
-        if val_metrics['auroc'] >= self.best_val_auroc:
+        if self.D_lowest_loss == -1 or self.D_losses[-1] <= self.D_lowest_loss:
+            # # delete the depreciated best model
+            # old_fname = 'best_epoch{}.ckpt'.format(
+            #     self.best_epoch_idx)
+            # old_pth = os.path.join(self.output_dir, old_fname)
+            # Path(old_pth).unlink(missing_ok=True)
+
             self.best_epoch_idx = epoch_idx
-            self.best_val_auroc = val_metrics['auroc']
+            self.D_lowest_loss = self.D_losses[-1]
 
             torch.save(netG_wts, os.path.join(self.output_dir,
                                               'best_GNet.ckpt'))
@@ -54,6 +62,6 @@ class OpenGanRecorder(BaseRecorder):
 
     def summary(self):
         print('Training Completed! '
-              'Best val AUROC on netD: {:.6f} '
-              'at epoch {:d}'.format(self.best_val_auroc, self.best_epoch_idx),
+              'Lowest loss on netD: {:.6f} '
+              'at epoch {:d}'.format(self.D_lowest_loss, self.best_epoch_idx),
               flush=True)

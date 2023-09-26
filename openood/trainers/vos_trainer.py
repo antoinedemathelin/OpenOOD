@@ -1,10 +1,8 @@
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch.distributions.multivariate_normal import MultivariateNormal
 from tqdm import tqdm
 
-import openood.utils.comm as comm
 from openood.utils import Config
 
 
@@ -22,17 +20,16 @@ class VOSTrainer:
         torch.nn.init.uniform_(weight_energy.weight)
         self.logistic_regression = torch.nn.Linear(1, 2).cuda()
         self.optimizer = torch.optim.SGD(
-            list(net.parameters()) + list(weight_energy.parameters()) +
+            list(net.parameters()) + list(weight_energy.parameters()) + \
             list(self.logistic_regression.parameters()),
-            config.optimizer['lr'],
-            momentum=config.optimizer['momentum'],
-            weight_decay=config.optimizer['weight_decay'],
-            nesterov=True)
+            config.optimizer['learning_rate'],
+             momentum=config.optimizer['momentum'],
+            weight_decay=config.optimizer['weight_decay'], nesterov=True)
         self.scheduler = torch.optim.lr_scheduler.LambdaLR(
             self.optimizer,
             lr_lambda=lambda step: cosine_annealing(
                 step, config.optimizer['num_epochs'] * len(train_loader), 1,
-                1e-6 / config.optimizer['lr']))
+                1e-6 / config.optimizer['learning_rate']))
         self.number_dict = {}
         for i in range(self.config['num_classes']):
             self.number_dict[i] = 0
@@ -52,8 +49,7 @@ class VOSTrainer:
                                      len(train_dataiter) + 1),
                                desc='Epoch {:03d}'.format(epoch_idx),
                                position=0,
-                               leave=True,
-                               disable=not comm.is_main_process()):
+                               leave=True):
             batch = next(train_dataiter)
             images = batch['data'].cuda()
             labels = batch['label'].cuda()
@@ -64,16 +60,16 @@ class VOSTrainer:
             for index in range(num_classes):
                 sum_temp += self.number_dict[index]
             lr_reg_loss = torch.zeros(1).cuda()[0]
-            if (sum_temp == num_classes * sample_number
-                    and epoch_idx < self.config['start_epoch']):
+            if sum_temp == num_classes * sample_number and epoch_idx < self.config[
+                    'start_epoch']:
                 target_numpy = labels.cpu().data.numpy()
                 for index in range(len(labels)):
                     dict_key = target_numpy[index]
                     self.data_dict[dict_key] = torch.cat(
                         (self.data_dict[dict_key][1:],
                          output[index].detach().view(1, -1)), 0)
-            elif (sum_temp == num_classes * sample_number
-                  and epoch_idx >= self.config['start_epoch']):
+            elif sum_temp == num_classes * sample_number and epoch_idx >= self.config[
+                    'start_epoch']:
                 target_numpy = labels.cpu().data.numpy()
                 for index in range(len(labels)):
                     dict_key = target_numpy[index]
@@ -96,7 +92,7 @@ class VOSTrainer:
                 temp_precision = torch.mm(X.t(), X) / len(X)
                 temp_precision += 0.0001 * eye_matrix
                 for index in range(num_classes):
-                    new_dis = MultivariateNormal(
+                    new_dis = torch.distributions.multivariate_normal.MultivariateNormal(
                         loc=mean_embed_id[index],
                         covariance_matrix=temp_precision)
                     negative_samples = new_dis.rsample(
@@ -111,17 +107,11 @@ class VOSTrainer:
                             (ood_samples, negative_samples[index_prob]), 0)
                 if len(ood_samples) != 0:
 
-                    energy_score_for_fg = log_sum_exp(x,
-                                                      num_classes=num_classes,
-                                                      dim=1)
-                    try:
-                        predictions_ood = self.net.fc(ood_samples)
-                    except AttributeError:
-                        predictions_ood = self.net.module.fc(ood_samples)
+                    energy_score_for_fg = log_sum_exp(x,num_classes=num_classes, dim=1)
 
-                    energy_score_for_bg = log_sum_exp(predictions_ood,
-                                                      num_classes=num_classes,
-                                                      dim=1)
+                    predictions_ood = self.net.fc(ood_samples)
+
+                    energy_score_for_bg = log_sum_exp(predictions_ood,num_classes=num_classes, dim=1)
 
                     input_for_lr = torch.cat(
                         (energy_score_for_fg, energy_score_for_bg), -1)
@@ -129,11 +119,11 @@ class VOSTrainer:
                         (torch.ones(len(output)).cuda(),
                          torch.zeros(len(ood_samples)).cuda()), -1)
 
+                    criterion = torch.nn.CrossEntropyLoss()
                     output1 = self.logistic_regression(input_for_lr.view(
                         -1, 1))
 
-                    lr_reg_loss = F.cross_entropy(output1,
-                                                  labels_for_lr.long())
+                    lr_reg_loss = criterion(output1, labels_for_lr.long())
             else:
                 target_numpy = labels.cpu().data.numpy()
                 for index in range(len(labels)):

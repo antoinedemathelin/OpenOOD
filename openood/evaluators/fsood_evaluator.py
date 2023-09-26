@@ -41,6 +41,10 @@ class FSOODEvaluator(OODEvaluator):
             'AUROC': '-',
             'AUPR_IN': '-',
             'AUPR_OUT': '-',
+            'CCR_4': '-',
+            'CCR_3': '-',
+            'CCR_2': '-',
+            'CCR_1': '-',
             'ACC': '{:.2f}'.format(100 * acc),
         }
         fieldnames = list(write_content.keys())

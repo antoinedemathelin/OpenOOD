@@ -14,4 +14,3 @@ network:
     image_size: '@{dataset.image_size}'
     pretrained: False
     num_gpus: '@{num_gpus}'
-    checkpoint: none

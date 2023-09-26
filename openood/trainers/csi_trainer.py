@@ -14,27 +14,20 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau, _LRScheduler
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import openood.utils.comm as comm
 from openood.utils import Config
 
 
 class CSITrainer:
     def __init__(self, net: nn.Module, train_loader: DataLoader,
                  config: Config) -> None:
-        self.net = net['backbone']
+        self.net = net
         self.train_loader = train_loader
         self.config = config
         self.mode = config.mode
 
-        if self.config.num_gpus > 1:
-            self.dummy_net = net['dummy_net'].module
-        else:
-            self.dummy_net = net['dummy_net']
-        self.dummy_net.cpu()
-
         self.simclr_aug = get_simclr_augmentation(
             config, image_size=config.dataset.image_size).cuda()
-        self.linear = net['linear']
+        self.linear = self.net.linear
         self.linear_optim = torch.optim.Adam(
             self.linear.parameters(),
             lr=1e-3,
@@ -43,14 +36,9 @@ class CSITrainer:
         self.criterion = nn.CrossEntropyLoss().cuda()
         self.hflip = HorizontalFlipLayer().cuda()
 
-        self.simclr_layer = net['simclr_layer']
-        self.rotation_linear = net['shift_cls_layer']
-        self.joint_linear = net['joint_distribution_layer']
-
         if 'step1' in self.mode:
             self.optimizer = optim.SGD(
-                list(self.net.parameters()) +
-                list(self.simclr_layer.parameters()),
+                net.parameters(),
                 lr=config.optimizer.lr,
                 momentum=0.9,
                 weight_decay=config.optimizer.weight_decay)
@@ -62,12 +50,16 @@ class CSITrainer:
                 total_epoch=config.optimizer.warmup,
                 after_scheduler=self.scheduler)
         else:
+            self.rotation_linear = net.shift_cls_layer
+            self.joint_linear = net.joint_distribution_layer
+
             milestones = [
                 int(0.6 * config.optimizer.num_epochs),
                 int(0.75 * config.optimizer.num_epochs),
                 int(0.9 * config.optimizer.num_epochs)
             ]
 
+            self.linear = self.net.linear
             self.linear_optim = torch.optim.Adam(
                 self.linear.parameters(),
                 lr=1e-3,
@@ -105,8 +97,7 @@ class CSITrainer:
                                      len(train_dataiter) + 1),
                                desc='Epoch {:03d}: '.format(epoch_idx),
                                position=0,
-                               leave=True,
-                               disable=not comm.is_main_process()):
+                               leave=True):
             batch = next(train_dataiter)
             images = batch['data'].cuda()
             labels = batch['label'].cuda()
@@ -126,17 +117,17 @@ class CSITrainer:
                                        dim=0)
 
             images_pair = self.simclr_aug(images_pair)  # simclr augment
-            _, features = self.net(images_pair, return_feature=True)
+            _, outputs_aux = self.net(images_pair,
+                                      simclr=True,
+                                      penultimate=True)
 
-            simclr_outputs = self.simclr_layer(features)
-            simclr = normalize(simclr_outputs)  # normalize
-            sim_matrix = get_similarity_matrix(
-                simclr, multi_gpu=self.config.num_gpus > 1)
+            simclr = normalize(outputs_aux['simclr'])  # normalize
+            sim_matrix = get_similarity_matrix(simclr, multi_gpu=False)
             loss_sim = Supervised_NT_xent(
                 sim_matrix,
                 labels=rot_sim_labels,
                 temperature=self.config.temperature,
-                multi_gpu=self.config.num_gpus > 1) * self.config.sim_lambda
+                multi_gpu=False) * self.config.sim_lambda
 
             # total loss
             loss = loss_sim
@@ -149,13 +140,14 @@ class CSITrainer:
             # lr = self.optimizer.param_groups[0]['lr']
 
             # Post-processing stuffs
-            penul_1 = features[:batch_size]
-            penul_2 = features[4 * batch_size:5 * batch_size]
-            features = torch.cat([penul_1,
-                                  penul_2])  # only use original rotation
+            penul_1 = outputs_aux['penultimate'][:batch_size]
+            penul_2 = outputs_aux['penultimate'][4 * batch_size:5 * batch_size]
+            outputs_aux['penultimate'] = torch.cat(
+                [penul_1, penul_2])  # only use original rotation
 
             # Linear evaluation
-            outputs_linear_eval = self.linear(features.detach())
+            outputs_linear_eval = self.linear(
+                outputs_aux['penultimate'].detach())
             loss_linear = self.criterion(outputs_linear_eval, labels.repeat(2))
 
             self.linear_optim.zero_grad()
@@ -167,29 +159,7 @@ class CSITrainer:
         metrics = {}
         metrics['epoch_idx'] = epoch_idx
         metrics['loss'] = loss
-
-        if self.config.num_gpus > 1:
-            self.dummy_net.backbone.load_state_dict(
-                self.net.module.state_dict())
-            self.dummy_net.linear.load_state_dict(
-                self.linear.module.state_dict())
-            self.dummy_net.simclr_layer.load_state_dict(
-                self.simclr_layer.module.state_dict())
-            self.dummy_net.joint_distribution_layer.load_state_dict(
-                self.joint_distribution_layer.module.state_dict())
-            self.dummy_net.shift_cls_layer.load_state_dict(
-                self.shift_cls_layer.module.state_dict())
-        else:
-            self.dummy_net.backbone.load_state_dict(self.net.state_dict())
-            self.dummy_net.linear.load_state_dict(self.linear.state_dict())
-            self.dummy_net.simclr_layer.load_state_dict(
-                self.simclr_layer.state_dict())
-            self.dummy_net.joint_distribution_layer.load_state_dict(
-                self.joint_distribution_layer.state_dict())
-            self.dummy_net.shift_cls_layer.load_state_dict(
-                self.shift_cls_layer.state_dict())
-
-        return self.dummy_net, metrics
+        return self.net, metrics
 
     def train_suplinear_epoch(self, epoch_idx):
         self.net.train()
@@ -199,8 +169,7 @@ class CSITrainer:
                                      len(train_dataiter) + 1),
                                desc='Epoch {:03d}: '.format(epoch_idx),
                                position=0,
-                               leave=True,
-                               disable=not comm.is_main_process()):
+                               leave=True):
             self.net.eval()
             batch = next(train_dataiter)
             images = batch['data'].cuda()
@@ -218,8 +187,8 @@ class CSITrainer:
                                      dim=0)
 
             images = self.simclr_aug(images)  # simclr augmentation
-            _, features = self.net(images, return_feature=True)
-            penultimate = features.detach()
+            _, outputs_aux = self.net(images, penultimate=True)
+            penultimate = outputs_aux['penultimate'].detach()
 
             outputs = self.linear(
                 penultimate[0:batch_size]
@@ -247,7 +216,7 @@ class CSITrainer:
             self.joint_linear_optim.step()
 
             # optimizer learning rate
-            # lr = self.linear_optim.param_groups[0]['lr']
+            lr = self.linear_optim.param_groups[0]['lr']
 
         self.linear_scheduler.step()
         self.rot_scheduler.step()
@@ -257,28 +226,7 @@ class CSITrainer:
         metrics['epoch_idx'] = epoch_idx
         metrics['loss'] = loss_ce + loss_rot + loss_joint
 
-        if self.config.num_gpus > 1:
-            self.dummy_net.backbone.load_state_dict(
-                self.net.module.state_dict())
-            self.dummy_net.linear.load_state_dict(
-                self.linear.module.state_dict())
-            self.dummy_net.simclr_layer.load_state_dict(
-                self.simclr_layer.module.state_dict())
-            self.dummy_net.joint_distribution_layer.load_state_dict(
-                self.joint_distribution_layer.module.state_dict())
-            self.dummy_net.shift_cls_layer.load_state_dict(
-                self.shift_cls_layer.module.state_dict())
-        else:
-            self.dummy_net.backbone.load_state_dict(self.net.state_dict())
-            self.dummy_net.linear.load_state_dict(self.linear.state_dict())
-            self.dummy_net.simclr_layer.load_state_dict(
-                self.simclr_layer.state_dict())
-            self.dummy_net.joint_distribution_layer.load_state_dict(
-                self.joint_distribution_layer.state_dict())
-            self.dummy_net.shift_cls_layer.load_state_dict(
-                self.shift_cls_layer.state_dict())
-
-        return self.dummy_net, metrics
+        return self.net, metrics
 
 
 def get_similarity_matrix(outputs, chunk=2, multi_gpu=False):
