@@ -1,11 +1,11 @@
 from types import MethodType
 
-import mmcv
+# import mmcv
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.nn as nn
-from mmcls.apis import init_model
+# from mmcls.apis import init_model
 
 import openood.utils.comm as comm
 
@@ -31,6 +31,9 @@ from .resnet18_256x256 import ResNet18_256x256
 from .resnet50 import ResNet50
 from .udg_net import UDGNet
 from .wrn import WideResNet
+from .mwe_resnet18_32x32 import MWE_ResNet18_32x32
+from .mwe_resnet18_64x64 import MWE_ResNet18_64x64
+from .mwe_lenet import MWE_LeNet
 
 
 def get_network(network_config):
@@ -39,6 +42,15 @@ def get_network(network_config):
 
     if network_config.name == 'resnet18_32x32':
         net = ResNet18_32x32(num_classes=num_classes)
+        
+    elif network_config.name == 'mwe_resnet18_32x32':
+        net = MWE_ResNet18_32x32(num_classes=num_classes)
+        
+    elif network_config.name == 'mwe_resnet18_64x64':
+        net = MWE_ResNet18_64x64(num_classes=num_classes)
+        
+    elif network_config.name == 'mwe_lenet':
+        net = MWE_LeNet(num_classes=num_classes)
 
     elif network_config.name == 'resnet18_256x256':
         net = ResNet18_256x256(num_classes=num_classes)
@@ -247,7 +259,7 @@ def get_network(network_config):
             pass
         else:
             try:
-                net.load_state_dict(torch.load(network_config.checkpoint),
+                net.load_state_dict(torch.load(network_config.checkpoint), #
                                     strict=False)
             except RuntimeError:
                 # sometimes fc should not be loaded
@@ -274,7 +286,7 @@ def get_network(network_config):
             for subnet in net.values():
                 subnet.cuda()
         else:
-            net.cuda()
+            net.cuda() # CPU !!!
         torch.cuda.manual_seed(1)
         np.random.seed(1)
     cudnn.benchmark = True

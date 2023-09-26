@@ -24,12 +24,14 @@ from .rd4ad_trainer import Rd4adTrainer
 from .sae_trainer import SAETrainer
 from .udg_trainer import UDGTrainer
 from .vos_trainer import VOSTrainer
+from .mwe_trainer import MaxWEnt
 
 
 def get_trainer(net, train_loader: DataLoader, config: Config):
     if type(train_loader) is DataLoader:
         trainers = {
             'base': BaseTrainer,
+            'mwe': MaxWEnt,
             'mixup': MixupTrainer,
             'sae': SAETrainer,
             'draem': DRAEMTrainer,

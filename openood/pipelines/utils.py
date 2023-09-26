@@ -11,9 +11,11 @@ from .train_oe_pipeline import TrainOEPipeline
 from .train_only_pipeline import TrainOpenGanPipeline
 from .train_pipeline import TrainPipeline
 from .test_ood_pipeline_aps import TestOODPipelineAPS
+from .mwe_pipeline import MWEPipeline
 
 def get_pipeline(config: Config):
     pipelines = {
+        'mwe': MWEPipeline,
         'train': TrainPipeline,
         'finetune': FinetunePipeline,
         'test_acc': TestAccPipeline,

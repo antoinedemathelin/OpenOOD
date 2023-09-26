@@ -1,0 +1,38 @@
+exp_name: "'@{dataset.name}'_'@{network.name}'_'@{trainer.name}'_'@{mark}'"
+output_dir: ./results/
+save_output: True
+merge_option: default
+mark: default
+
+num_gpus: 1
+num_workers: 4
+num_machines: 1
+machine_rank: 0
+
+preprocessor:
+  name: base
+  
+postprocessor:
+  name: mwe
+  postprocessor_args:
+    n_preds: 10
+
+network:
+  pretrained: True
+
+pipeline:
+  name: mwe
+
+trainer:
+  name: mwe
+
+evaluator:
+  name: mwe
+
+optimizer:
+  name: adam
+  num_epochs: 20
+  lr: 0.0005
+
+recorder:
+  name: mwe

@@ -21,7 +21,7 @@ from .mds_postprocessor import MDSPostprocessor
 from .mos_postprocessor import MOSPostprocessor
 from .odin_postprocessor import ODINPostprocessor
 from .opengan_postprocessor import OpenGanPostprocessor
-from .openmax_postprocessor import OpenMax
+# from .openmax_postprocessor import OpenMax
 from .patchcore_postprocessor import PatchcorePostprocessor
 from .rd4ad_postprocessor import Rd4adPostprocessor
 from .react_postprocessor import ReactPostprocessor
@@ -29,18 +29,20 @@ from .residual_postprocessor import ResidualPostprocessor
 from .ssd_postprocessor import SSDPostprocessor
 from .temp_scaling_postprocessor import TemperatureScalingPostprocessor
 from .vim_postprocessor import VIMPostprocessor
+from .mwe_postprocessor import MWEPostprocessor
 
 
 def get_postprocessor(config: Config):
     postprocessors = {
         'conf_branch': ConfBranchPostprocessor,
+        'mwe': MWEPostprocessor,
         'msp': BasePostprocessor,
         'ebo': EBOPostprocessor,
         'odin': ODINPostprocessor,
         'mds': MDSPostprocessor,
         'gmm': GMMPostprocessor,
         'patchcore': PatchcorePostprocessor,
-        'openmax': OpenMax,
+        # 'openmax': OpenMax,
         'react': ReactPostprocessor,
         'vim': VIMPostprocessor,
         'gradnorm': GradNormPostprocessor,

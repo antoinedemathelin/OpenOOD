@@ -45,17 +45,17 @@ class BaseRecorder:
             torch.save(net.state_dict(),
                        os.path.join(self.output_dir, 'best.ckpt'))
 
-            save_fname = 'best_epoch{}_acc{:.4f}.ckpt'.format(
-                self.best_epoch_idx, self.best_acc)
-            save_pth = os.path.join(self.output_dir, save_fname)
-            torch.save(net.state_dict(), save_pth)
+            # save_fname = 'best_epoch{}_acc{:.4f}.ckpt'.format(
+            #     self.best_epoch_idx, self.best_acc)
+            # save_pth = os.path.join(self.output_dir, save_fname)
+            # torch.save(net.state_dict(), save_pth)
 
         # save last path
-        if val_metrics['epoch_idx'] == self.config.optimizer.num_epochs:
-            save_fname = 'last_epoch{}_acc{:.4f}.ckpt'.format(
-                val_metrics['epoch_idx'], val_metrics['acc'])
-            save_pth = os.path.join(self.output_dir, save_fname)
-            torch.save(net.state_dict(), save_pth)
+        # if val_metrics['epoch_idx'] == self.config.optimizer.num_epochs:
+        #     save_fname = 'last_epoch{}_acc{:.4f}.ckpt'.format(
+        #         val_metrics['epoch_idx'], val_metrics['acc'])
+        #     save_pth = os.path.join(self.output_dir, save_fname)
+        #     torch.save(net.state_dict(), save_pth)
 
     def summary(self):
         print('Training Completed! '

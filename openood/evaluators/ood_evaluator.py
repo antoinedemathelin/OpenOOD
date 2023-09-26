@@ -124,7 +124,7 @@ class OODEvaluator(BaseEvaluator):
               end=' ',
               flush=True)
         print('ACC: {:.2f}'.format(accuracy * 100), flush=True)
-        print(u'\u2500' * 70, flush=True)
+        print('#' * 70, flush=True)
 
         csv_path = os.path.join(self.config.output_dir, 'ood.csv')
         if not os.path.exists(csv_path):

@@ -5,6 +5,7 @@ from openood.evaluators import get_evaluator
 from openood.networks import get_network
 from openood.postprocessors import get_postprocessor
 from openood.utils import setup_logger
+import torch.nn as nn
 
 
 class TestOODPipeline:
@@ -30,18 +31,19 @@ class TestOODPipeline:
         # setup for distance-based methods
         postprocessor.setup(net, id_loader_dict, ood_loader_dict)
         print('\n', flush=True)
-        print(u'\u2500' * 70, flush=True)
-
+        print('#' * 70, flush=True)
+        
         # start calculating accuracy
         print('\nStart evaluation...', flush=True)
         acc_metrics = evaluator.eval_acc(net, id_loader_dict['test'],
                                          postprocessor)
         print('\nAccuracy {:.2f}%'.format(100 * acc_metrics['acc']),
               flush=True)
-        print(u'\u2500' * 70, flush=True)
-
+        print('#' * 70, flush=True)
+        
         # start evaluating ood detection methods
         timer = time.time()
-        evaluator.eval_ood(net, id_loader_dict, ood_loader_dict, postprocessor)
+        metrics = evaluator.eval_ood(net, id_loader_dict, ood_loader_dict, postprocessor)
+        print(metrics)
         print('Time used for eval_ood: {:.0f}s'.format(time.time() - timer))
         print('Completed!', flush=True)

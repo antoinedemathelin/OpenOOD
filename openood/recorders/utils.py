@@ -9,11 +9,12 @@ from .dsvdd_recorder import DCAERecorder, DSVDDRecorder
 from .kdad_recorder import KdadRecorder
 from .opengan_recorder import OpenGanRecorder
 from .rd4ad_recorder import Rd4adRecorder
-
+from .mwe_recorder import MWERecorder
 
 def get_recorder(config: Config):
     recorders = {
         'base': BaseRecorder,
+        'mwe': MWERecorder,
         'draem': DRAEMRecorder,
         'opengan': OpenGanRecorder,
         'dcae': DCAERecorder,
