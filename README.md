@@ -24,4 +24,4 @@ The codebase accesses the datasets from `./data/` and pretrained models from `./
 
 ## Run MaxWEnt Experiments
 
-The scripts to run the MaxWEnt experiments can be found in the `mwe_scripts/` folder.
+The scripts to run the MaxWEnt experiments can be found in the `./mwe_scripts/` folder.
